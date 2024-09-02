@@ -6,7 +6,7 @@ np.random.seed(42)
 # Network architecture parameters
 INPUT_SIZE = 784  # Number of input features (e.g., 28x28 pixels for MNIST)
 HIDDEN_SIZE = 64  # Number of neurons in the hidden layer
-OUTPUT_SIZE = 10  # Number of classes (e.g., 10 digits for MNIST)
+OUTPUT_SIZE = 10  # Number of classes (10 digits for MNIST)
 
 # Initialize weights and biases
 W1 = np.random.randn(INPUT_SIZE, HIDDEN_SIZE) * 0.01  # Shape: (784, 64)
