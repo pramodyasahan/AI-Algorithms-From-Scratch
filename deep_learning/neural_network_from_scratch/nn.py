@@ -5,14 +5,14 @@ np.random.seed(42)
 
 # Network architecture parameters
 INPUT_SIZE = 784  # Number of input features (e.g., 28x28 pixels for MNIST)
-HIDDEN_SIZE = 10  # Number of neurons in the hidden layer
+HIDDEN_SIZE = 64  # Number of neurons in the hidden layer
 OUTPUT_SIZE = 10  # Number of classes (e.g., 10 digits for MNIST)
 
 # Initialize weights and biases
-W1 = np.random.randn(INPUT_SIZE, HIDDEN_SIZE) * 0.01  # Shape: (784, 10)
-W2 = np.random.randn(HIDDEN_SIZE, OUTPUT_SIZE) * 0.01  # Shape: (10, 10)
+W1 = np.random.randn(INPUT_SIZE, HIDDEN_SIZE) * 0.01  # Shape: (784, 64)
+W2 = np.random.randn(HIDDEN_SIZE, OUTPUT_SIZE) * 0.01  # Shape: (64, 10)
 
-b1 = np.zeros((1, HIDDEN_SIZE))  # Shape: (1, 10)
+b1 = np.zeros((1, HIDDEN_SIZE))  # Shape: (1, 64)
 b2 = np.zeros((1, OUTPUT_SIZE))  # Shape: (1, 10)
 
 
@@ -53,12 +53,12 @@ def forward_propagation(X):
     - A2: Activation for output layer, shape (number of examples, OUTPUT_SIZE)
     """
     # Linear combination for the hidden layer
-    Z1 = np.dot(X, W1) + b1  # Shape: (m, 10)
-    A1 = sigmoid(Z1)  # Activation for hidden layer, Shape: (m, 10)
+    Z1 = np.dot(X, W1) + b1  # Shape: (number of examples, 64)
+    A1 = sigmoid(Z1)  # Activation for hidden layer, Shape: (number of examples, 64)
 
     # Linear combination for the output layer
-    Z2 = np.dot(A1, W2) + b2  # Shape: (m, 10)
-    A2 = softmax(Z2)  # Activation for output layer, Shape: (m, 10)
+    Z2 = np.dot(A1, W2) + b2  # Shape: (number of examples, 10)
+    A2 = softmax(Z2)  # Activation for output layer, Shape: (number of examples, 10)
 
     return Z1, A1, Z2, A2
 
@@ -98,19 +98,19 @@ def backpropagation(X, Y, Z1, A1, Z2, A2):
     # Output layer error
     dZ2 = A2
     dZ2[range(m), Y] -= 1
-    dZ2 /= m
+    dZ2 /= m  # Shape: (number of examples, 10)
 
     # Gradients for W2 and b2
-    dW2 = np.dot(A1.T, dZ2)  # Shape: (HIDDEN_SIZE, OUTPUT_SIZE)
-    db2 = np.sum(dZ2, axis=0, keepdims=True)  # Shape: (1, OUTPUT_SIZE)
+    dW2 = np.dot(A1.T, dZ2)  # Shape: (64, 10)
+    db2 = np.sum(dZ2, axis=0, keepdims=True)  # Shape: (1, 10)
 
     # Hidden layer error
-    dA1 = np.dot(dZ2, W2.T)  # Shape: (m, HIDDEN_SIZE)
-    dZ1 = dA1 * sigmoid_derivative(Z1)  # Shape: (m, HIDDEN_SIZE)
+    dA1 = np.dot(dZ2, W2.T)  # Shape: (number of examples, 64)
+    dZ1 = dA1 * sigmoid_derivative(Z1)  # Shape: (number of examples, 64)
 
     # Gradients for W1 and b1
-    dW1 = np.dot(X.T, dZ1)  # Shape: (INPUT_SIZE, HIDDEN_SIZE)
-    db1 = np.sum(dZ1, axis=0, keepdims=True)  # Shape: (1, HIDDEN_SIZE)
+    dW1 = np.dot(X.T, dZ1)  # Shape: (784, 64)
+    db1 = np.sum(dZ1, axis=0, keepdims=True)  # Shape: (1, 64)
 
     return dW1, db1, dW2, db2
 
@@ -150,7 +150,4 @@ def train(X, Y, epochs, learning_rate):
 
         # Print loss every 100 epochs
         if epoch % 100 == 0:
-            # Calculate accuracy
-            predictions = np.argmax(A2, axis=1)  # Predicted class is the index with the highest probability
-            accuracy = np.mean(predictions == Y) * 100  # Calculate accuracy as the mean of correct predictions
-            print(f'Epoch {epoch}, Loss: {loss:.4f}, Accuracy: {accuracy:.2f}%')
+            print(f'Epoch {epoch}, Loss: {loss:.4f}')
