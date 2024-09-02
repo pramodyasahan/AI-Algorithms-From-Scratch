@@ -150,4 +150,7 @@ def train(X, Y, epochs, learning_rate):
 
         # Print loss every 100 epochs
         if epoch % 100 == 0:
-            print(f'Epoch {epoch}, Loss: {loss:.4f}')
+            # Calculate accuracy
+            predictions = np.argmax(A2, axis=1)  # Predicted class is the index with the highest probability
+            accuracy = np.mean(predictions == Y) * 100  # Calculate accuracy as the mean of correct predictions
+            print(f'Epoch {epoch}, Loss: {loss:.4f}, Accuracy: {accuracy:.2f}%')
