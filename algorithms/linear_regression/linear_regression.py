@@ -24,8 +24,10 @@ class LinearRegression:
         y (ndarray): Training data labels, shape (n_samples, 1).
         """
         n_samples, n_features = X.shape
+        y = y.reshape(-1, 1)
+
         self.weights = np.random.randn(n_features, 1)
-        self.biases = np.zeros(1)
+        self.biases = 0
 
         for _ in range(self.num_iterations):
             y_pred = np.dot(X, self.weights) + self.biases
