@@ -1,22 +1,18 @@
-import numpy as np
-import pandas as pd
+from sklearn import datasets
+from utils.validation_metrics import mean_squared_error, r_squared
+from utils.visualization import plot_regression_line
 from linear_regression import LinearRegression
-from sklearn.datasets import fetch_california_housing
 from sklearn.model_selection import train_test_split
 
-# Fetch the dataset
-housing_data = fetch_california_housing()
-X = housing_data.data
-y = housing_data.target
+X, y = datasets.make_regression(n_samples=1000, n_features=1, noise=20, random_state=10)
+X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=0)
 
-# Split the data
-X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
+regressor = LinearRegression(learning_rate=0.01)
+regressor.fit(X_train, y_train)
+y_pred = regressor.predict(X_test)
 
-# Normalize the features
-mean = np.mean(X_train, axis=0)
-std = np.std(X_train, axis=0)
-X_train_normalized = (X_train - mean) / std
-X_test_normalized = (X_test - mean) / std
-
-regressor = LinearRegression()
-regressor.fit(X_train_normalized, y_train)
+plot_regression_line(X_test, y_test, y_pred)
+mse = mean_squared_error(y_test, y_pred)
+r2 = r_squared(y_test, y_pred)
+print(f'MSE: {mse}')
+print(f'R2: {r2}')
