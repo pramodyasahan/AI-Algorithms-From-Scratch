@@ -1,14 +1,17 @@
 import matplotlib.pyplot as plt
 
 
-def plot_regression_line(X_test, y_test, feature_name='Feature', target_name='Target'):
+def plot_regression_line(X_test, y_test, y_pred, feature_index=0, feature_name='Feature', target_name='Target'):
     plt.figure(figsize=(10, 6))
 
-    # Scatter plot of the feature vs target
-    plt.scatter(X_test, y_test, color='blue', label='Actual Data')
+    # Extract the specific feature for plotting
+    X_feature_test = X_test[:, feature_index]
 
-    # Plot the regression line
-    plt.plot(X_test, X_test, color='red', label='Regression Line')
+    # Scatter plot of the feature vs target
+    plt.scatter(X_feature_test, y_test, color='blue', label='Actual Data')
+
+    # Plot the regression line (for the chosen feature)
+    plt.plot(X_feature_test, y_pred, color='red', label='Regression Line')
 
     plt.xlabel(f'Normalized {feature_name}')
     plt.ylabel(target_name)
