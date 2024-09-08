@@ -1,42 +1,57 @@
-import numpy as np
+from layers import *
+from utils import softmax
 
 
-def conv2d(input, kernel, stride=1, padding=0):
-    in_depth, in_width, in_height = input.shape
-    out_channels, kernel_height, kernel_width = kernel.shape[0], kernel.shape[2], kernel.shape[3]
+class AlexNet:
+    """
+    AlexNet Model Class
+    """
 
-    input_padded = np.pad(input, ((0, 0), (padding, padding), (padding, padding)), mode='constant')
+    def __init__(self, num_classes=10):
+        self.conv1 = ConvLayer(3, 96, kernel_size=11, stride=4, padding=2)
+        self.relu1 = ReLULayer()
+        self.pool1 = PoolingLayer(pool_size=3, stride=2)
 
-    out_height = (in_height + 2 * padding - kernel_height) // stride + 1
-    out_width = (in_width + 2 * padding - kernel_width) // stride + 1
-    output = np.zeros((out_channels, out_height, out_width))
+        self.conv2 = ConvLayer(96, 256, kernel_size=5, stride=1, padding=2)
+        self.relu2 = ReLULayer()
+        self.pool2 = PoolingLayer(pool_size=3, stride=2)
 
-    for i in range(out_height):
-        for j in range(out_width):
-            for c in range(out_channels):
-                region = input_padded[:, i * stride:i * stride + kernel_height, j * stride:j * stride + kernel_width]
-                output[c, i, j] = np.sum(region * kernel[c])
+        self.conv3 = ConvLayer(256, 384, kernel_size=3, stride=1, padding=1)
+        self.relu3 = ReLULayer()
 
-    return output
+        self.conv4 = ConvLayer(384, 384, kernel_size=3, stride=1, padding=1)
+        self.relu4 = ReLULayer()
 
+        self.conv5 = ConvLayer(384, 256, kernel_size=3, stride=1, padding=1)
+        self.relu5 = ReLULayer()
+        self.pool3 = PoolingLayer(pool_size=3, stride=2)
 
-def max_pooling(input, pool_size, stride):
-    in_depth, in_height, in_width = input.shape
-    out_height = (in_height - pool_size) // stride + 1
-    out_width = (in_width - pool_size) // stride + 1
-    output = np.zeros((in_depth, out_height, out_width))
+        self.fc1 = FullyConnectedLayer(256 * 6 * 6, 4096)
+        self.relu6 = ReLULayer()
+        self.dropout1 = DropoutLayer()
 
-    for i in range(out_height):
-        for j in range(out_width):
-            region = input[:, i * stride:i * stride + pool_size, j * stride:j * stride + pool_size]
-            output[:, i, j] = np.max(region, axis=(1, 2))
+        self.fc2 = FullyConnectedLayer(4096, 4096)
+        self.relu7 = ReLULayer()
+        self.dropout2 = DropoutLayer()
+        self.fc3 = FullyConnectedLayer(4096, num_classes)
 
-    return output
+    def apply_layers(self, x, layers):
+        for layer in layers:
+            x = layer.forward(x)
+        return x
 
+    def forward(self, input):
+        # Sequentially apply layers using the helper function
+        x = self.apply_layers(input, [self.conv1, self.relu1, self.pool1])
+        x = self.apply_layers(x, [self.conv2, self.relu2, self.pool2])
+        x = self.apply_layers(x, [self.conv3, self.relu3])
+        x = self.apply_layers(x, [self.conv4, self.relu4])
+        x = self.apply_layers(x, [self.conv5, self.relu5, self.pool3])
 
-def relu(x):
-    return np.maximum(0, x)
+        x = x.flatten()  # Flatten for fully connected layers
 
+        x = self.apply_layers(x, [self.fc1, self.relu6, self.dropout1])
+        x = self.apply_layers(x, [self.fc2, self.relu7, self.dropout2])
+        output = softmax(self.fc3.forward(x))
 
-def fully_connected(input, weights, bias):
-    return np.dot(weights, input) + bias
+        return output
