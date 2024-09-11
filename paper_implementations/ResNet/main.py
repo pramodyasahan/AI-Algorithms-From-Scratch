@@ -4,7 +4,7 @@ import torch.optim as optim
 from torchsummary import summary
 from dataloader import dataloader_cifar
 from layers import BasicConvBlock
-from ResNet.resnet import ResNet  # Correct the import path if needed
+from ..ResNet.resnet import ResNet
 
 
 # Function to create a ResNet-56 model
