@@ -4,122 +4,123 @@ import torch.optim as optim
 from torchsummary import summary
 from dataloader import dataloader_cifar
 from layers import BasicConvBlock
-from ..ResNet.resnet import ResNet
+from ResNet.resnet import ResNet  # Correct the import path if needed
 
 
+# Function to create a ResNet-56 model
 def ResNet56():
     return ResNet(block_type=BasicConvBlock, num_blocks=[9, 9, 9])
 
 
-model = ResNet56()
-device = torch.device("cuda") if torch.cuda.is_available() else torch.device("cpu")
-# device = 'cpu'
-model.to(device)
-summary(model, (3, 32, 32))
-
-train_loader, val_loader, test_loader = dataloader_cifar()
-
-criterion = nn.CrossEntropyLoss()
-optimizer = optim.Adam(model.parameters(), lr=0.01)
-
-
-def train_model():
-    EPOCHS = 15
-    train_samples_num = 45000
-    val_samples_num = 5000
+# Function to train the model
+def train_model(model, device, train_loader, val_loader, criterion, optimizer, epochs=15):
+    train_samples_num = len(train_loader.dataset)
+    val_samples_num = len(val_loader.dataset)
     train_costs, val_costs = [], []
 
-    # Training phase.
-    for epoch in range(EPOCHS):
-
+    # Training phase
+    for epoch in range(epochs):
         train_running_loss = 0
         correct_train = 0
 
-        model.train().cuda()
+        model.train()  # Set the model to training mode
 
         for inputs, labels in train_loader:
             inputs, labels = inputs.to(device), labels.to(device)
 
-            optimizer.zero_grad()
+            optimizer.zero_grad()  # Zero the gradients
 
-            prediction = model(inputs)
+            prediction = model(inputs)  # Forward pass
 
-            loss = criterion(prediction, labels)
+            loss = criterion(prediction, labels)  # Compute the loss
 
-            loss.backward()
-            optimizer.step()
+            loss.backward()  # Backward pass
+            optimizer.step()  # Update weights
 
             _, predicted_outputs = torch.max(prediction.data, 1)
-
-            # Update the running corrects
             correct_train += (predicted_outputs == labels).float().sum().item()
-
-            train_running_loss += (loss.data.item() * inputs.shape[0])
+            train_running_loss += loss.item() * inputs.size(0)
 
         train_epoch_loss = train_running_loss / train_samples_num
-
         train_costs.append(train_epoch_loss)
-
         train_acc = correct_train / train_samples_num
 
-        # Now check trained weights on the validation set
+        # Validation phase
         val_running_loss = 0
         correct_val = 0
-
-        model.eval().cuda()
+        model.eval()  # Set the model to evaluation mode
 
         with torch.no_grad():
             for inputs, labels in val_loader:
                 inputs, labels = inputs.to(device), labels.to(device)
 
-                # Forward pass.
-                prediction = model(inputs)
+                prediction = model(inputs)  # Forward pass
+                loss = criterion(prediction, labels)  # Compute the loss
 
-                # Compute the loss.
-                loss = criterion(prediction, labels)
-
-                # Compute validation accuracy.
                 _, predicted_outputs = torch.max(prediction.data, 1)
                 correct_val += (predicted_outputs == labels).float().sum().item()
 
-            # Compute batch loss.
-            val_running_loss += (loss.data.item() * inputs.shape[0])
+                val_running_loss += loss.item() * inputs.size(0)
 
-            val_epoch_loss = val_running_loss / val_samples_num
-            val_costs.append(val_epoch_loss)
-            val_acc = correct_val / val_samples_num
+        val_epoch_loss = val_running_loss / val_samples_num
+        val_costs.append(val_epoch_loss)
+        val_acc = correct_val / val_samples_num
 
-        info = "[Epoch {}/{}]: train-loss = {:0.6f} | train-acc = {:0.3f} | val-loss = {:0.6f} | val-acc = {:0.3f}"
+        # Logging the results
+        info = "[Epoch {}/{}]: train-loss = {:.6f} | train-acc = {:.3f} | val-loss = {:.6f} | val-acc = {:.3f}"
+        print(info.format(epoch + 1, epochs, train_epoch_loss, train_acc, val_epoch_loss, val_acc))
 
-        print(info.format(epoch + 1, EPOCHS, train_epoch_loss, train_acc, val_epoch_loss, val_acc))
+        # Save the model checkpoint
+        torch.save(model.state_dict(), f'./checkpoint_gpu_{epoch + 1}.pth')
 
-        torch.save(model.state_dict(), '/content/checkpoint_gpu_{}'.format(epoch + 1))
-
-    torch.save(model.state_dict(), '/content/resnet-56_weights_gpu')
+    torch.save(model.state_dict(), './resnet-56_weights_gpu.pth')
 
     return train_costs, val_costs
 
 
-train_costs, val_costs = train_model()
-model = ResNet56()
-model.load_state_dict(torch.load('/content/resnet-56_weights_gpu'))
+# Function to test the model
+def test_model(model, device, test_loader):
+    model.eval()  # Set the model to evaluation mode
+    correct = 0
+    test_samples_num = len(test_loader.dataset)
 
-test_samples_num = 256
-correct = 0
+    with torch.no_grad():
+        for inputs, labels in test_loader:
+            inputs, labels = inputs.to(device), labels.to(device)
+            prediction = model(inputs)  # Make predictions
+            _, predicted_class = torch.max(prediction.data, 1)
+            correct += (predicted_class == labels).float().sum().item()
 
-model.eval().cuda()
+    test_accuracy = correct / test_samples_num
+    print('Test accuracy: {:.3f}'.format(test_accuracy))
+    return test_accuracy
 
-with  torch.no_grad():
-    for inputs, labels in test_loader:
-        inputs, labels = inputs.to(device), labels.to(device)
-        # Make predictions.
-        prediction = model(inputs)
 
-        # Retrieve predictions indexes.
-        _, predicted_class = torch.max(prediction.data, 1)
+# Main function
+def main():
+    # Initialize model, device, criterion, and optimizer
+    model = ResNet56()
+    device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+    model.to(device)
+    summary(model, (3, 32, 32))
 
-        # Compute number of correct predictions.
-        correct += (predicted_class == labels).float().sum().item()
+    # Load data
+    train_loader, val_loader, test_loader = dataloader_cifar()
 
-test_accuracy = correct / test_samples_num
-print('Test accuracy: {}'.format(test_accuracy))
+    # Define loss function and optimizer
+    criterion = nn.CrossEntropyLoss()
+    optimizer = optim.Adam(model.parameters(), lr=0.01)
+
+    # Train the model
+    train_costs, val_costs = train_model(model, device, train_loader, val_loader, criterion, optimizer)
+
+    # Load the best model weights
+    model.load_state_dict(torch.load('./resnet-56_weights_gpu.pth'))
+
+    # Test the model
+    test_model(model, device, test_loader)
+
+
+# Entry point
+if __name__ == "__main__":
+    main()
