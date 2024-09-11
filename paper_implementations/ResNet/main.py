@@ -4,7 +4,7 @@ import torch.optim as optim
 from torchsummary import summary
 from dataloader import dataloader_cifar
 from layers import BasicConvBlock
-from ..ResNet.resnet import ResNet
+from paper_implementations.ResNet.resnet import ResNet
 
 
 # Function to create a ResNet-56 model
@@ -73,27 +73,10 @@ def train_model(model, device, train_loader, val_loader, criterion, optimizer, e
         # Save the model checkpoint
         torch.save(model.state_dict(), f'./checkpoint_gpu_{epoch + 1}.pth')
 
+    # Save final model weights
     torch.save(model.state_dict(), './resnet-56_weights_gpu.pth')
 
     return train_costs, val_costs
-
-
-# Function to test the model
-def test_model(model, device, test_loader):
-    model.eval()  # Set the model to evaluation mode
-    correct = 0
-    test_samples_num = len(test_loader.dataset)
-
-    with torch.no_grad():
-        for inputs, labels in test_loader:
-            inputs, labels = inputs.to(device), labels.to(device)
-            prediction = model(inputs)  # Make predictions
-            _, predicted_class = torch.max(prediction.data, 1)
-            correct += (predicted_class == labels).float().sum().item()
-
-    test_accuracy = correct / test_samples_num
-    print('Test accuracy: {:.3f}'.format(test_accuracy))
-    return test_accuracy
 
 
 # Main function
@@ -116,9 +99,6 @@ def main():
 
     # Load the best model weights
     model.load_state_dict(torch.load('./resnet-56_weights_gpu.pth'))
-
-    # Test the model
-    test_model(model, device, test_loader)
 
 
 # Entry point
