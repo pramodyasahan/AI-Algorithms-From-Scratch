@@ -1,19 +1,24 @@
 from torchvision import transforms, datasets
 from torch.utils.data import DataLoader, random_split
+import os
 
 
 def dataloader_cifar():
-    # Correct normalization for CIFAR-10 (RGB images)
+    # Define a local directory to store the dataset
+    data_dir = './data'
+
+    # Ensure the directory exists
+    os.makedirs(data_dir, exist_ok=True)
+
+    # Define normalization transforms for CIFAR-10 (RGB images)
     transform = transforms.Compose([
         transforms.ToTensor(),
         transforms.Normalize(mean=[0.5, 0.5, 0.5], std=[0.5, 0.5, 0.5])
     ])
 
     # Load CIFAR-10 datasets
-    train_dataset = datasets.CIFAR10('/content/drive/MyDrive/All_Datasets/CIFAR10', train=True, download=True,
-                                     transform=transform)
-    test_dataset = datasets.CIFAR10('/content/drive/MyDrive/All_Datasets/CIFAR10', train=False, download=True,
-                                    transform=transform)
+    train_dataset = datasets.CIFAR10(root=data_dir, train=True, download=True, transform=transform)
+    test_dataset = datasets.CIFAR10(root=data_dir, train=False, download=True, transform=transform)
 
     # Split dataset into training and validation sets
     train_dataset, val_dataset = random_split(train_dataset, [45000, 5000])
