@@ -42,8 +42,6 @@ git clone https://github.com/pramodyasahan/AI-Algorithms-FromScratch.git
 cd algorithms/unsupervised_lerning/Hierarchical_Clustering
 ```
 
-## Installation
-
 Install the required Python packages
 
 ```bash
