@@ -39,7 +39,7 @@ Clone the repository:
 
 ```bash
 git clone https://github.com/pramodyasahan/AI-Algorithms-FromScratch.git
-cd algorithms/unsupervised_lerning/K_Means_Clustering
+cd algorithms/unsupervised_lerning/kmeans
 ```
 
 Install the required Python packages

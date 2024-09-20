@@ -1,7 +1,7 @@
 import numpy as np
 from sklearn.datasets import fetch_openml
 from sklearn.model_selection import train_test_split
-from nn import train, forward_propagation
+from architectures.nn.nn import train, forward_propagation
 
 # Loading the MNIST dataset
 print("Loading the MNIST dataset...")

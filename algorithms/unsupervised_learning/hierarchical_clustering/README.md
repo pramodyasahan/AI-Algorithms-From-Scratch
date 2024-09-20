@@ -39,7 +39,7 @@ Clone the repository:
 
 ```bash
 git clone https://github.com/pramodyasahan/AI-Algorithms-FromScratch.git
-cd algorithms/unsupervised_lerning/Hierarchical_Clustering
+cd algorithms/unsupervised_lerning/hierarchical_clustering
 ```
 
 Install the required Python packages

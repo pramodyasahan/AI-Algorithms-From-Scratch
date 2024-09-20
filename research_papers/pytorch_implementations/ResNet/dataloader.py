@@ -5,7 +5,7 @@ import os
 
 def dataloader_cifar():
     # Define a local directory to store the dataset
-    data_dir = './data'
+    data_dir = 'data'
 
     # Ensure the directory exists
     os.makedirs(data_dir, exist_ok=True)
