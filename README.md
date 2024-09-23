@@ -158,7 +158,7 @@ knowledge gained from scratch implementations and PyTorch efficiency.
 
 1. **Clone the Repository**:
    ```bash
-   git clone https://github.com/pramodyasahan/AI-Algorithms-FromScratch.git
+   git clone https://github.com/pramodyasahan/AI-Algorithms-From-Scratch.git
    cd AI-Algorithm-FromScratch
    ```
 
