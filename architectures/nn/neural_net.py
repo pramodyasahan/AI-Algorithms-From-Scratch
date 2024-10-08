@@ -41,3 +41,23 @@ def forward_propagation(X, W1, b1, W2, b2):
 
 def relu_derivative(Z):
     return Z > 0
+
+
+def backward_propagation(X, y, Z1, A1, Z2, W2, b2):
+    m = y.shape[0]
+
+    dZ2 = A2 - np.eye(10)[y]
+    dW2 = np.dot(dZ2.T, A1) / m
+    db2 = np.sum(dZ2, axis=0, keepdims=True) / m
+
+    dA1 = np.dot(dZ2, W2)
+    dZ1 = dA1 * relu_derivative(Z1)
+
+    dW1 = np.dot(dZ1.T, X) / m
+    db1 = np.sum(dZ1, axis=0, keepdims=True) / m
+
+    return dW1, db1, dW2, db2
+
+
+Z1, A1, Z2, A2 = forward_propagation(X_train, W1, b1, W2, b2)
+backward_propagation(X_train, y_train, Z1, A1, Z2, W2, b2)
