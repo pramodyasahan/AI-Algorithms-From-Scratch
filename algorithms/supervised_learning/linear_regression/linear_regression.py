@@ -44,14 +44,12 @@ class LinearRegression:
             y_pred = np.dot(X, self.weights) + self.biases
 
             # Compute gradients
-            dw = (-2 / n_samples) * np.dot(X.T, (y_pred - y))
-            db = (-2 / n_samples) * np.sum(y_pred - y)
+            dw = (2 / n_samples) * np.dot(X.T, (y_pred - y))
+            db = (2 / n_samples) * np.sum(y_pred - y)
 
             # Update parameters
             self.weights -= self.learning_rate * dw
             self.biases -= self.learning_rate * db
-
-        return self
 
     def predict(self, X):
         """
